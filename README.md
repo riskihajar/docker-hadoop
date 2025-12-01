@@ -25,13 +25,13 @@ Project ini menyediakan setup lengkap untuk menjalankan **Apache Hadoop 3.3.6** 
 │                    HDFS Layer                           │
 │  ┌──────────────┐                                       │
 │  │  NameNode    │  Metadata Management                  │
-│  │  Port: 9870  │  (Web UI)                            │
+│  │  Port: 9870  │  (Web UI)                             │
 │  └──────┬───────┘                                       │
-│         │                                                │
-│    ┌────┴────┬──────────┬──────────┐                   │
-│ ┌──▼────┐ ┌─▼──────┐ ┌─▼──────┐                        │
-│ │DataN1 │ │DataN2  │ │DataN3  │  Total: ~720GB         │
-│ └───────┘ └────────┘ └────────┘                        │
+│         │                                               │
+│    ┌────┴────┬──────────┬──────────┐                    │
+│ ┌──▼────┐ ┌──▼─────┐ ┌──▼─────┐                         │
+│ │DataN1 │ │DataN2  │ │DataN3  │  Total: ~720GB          │
+│ └───────┘ └────────┘ └────────┘                         │
 │  Replication Factor: 3 (fault tolerant)                 │
 └─────────────────────────────────────────────────────────┘
 
@@ -39,13 +39,13 @@ Project ini menyediakan setup lengkap untuk menjalankan **Apache Hadoop 3.3.6** 
 │                    YARN Layer                           │
 │  ┌──────────────────┐                                   │
 │  │ ResourceManager  │  Resource Scheduling              │
-│  │  Port: 8088      │  (Web UI)                        │
+│  │  Port: 8088      │  (Web UI)                         │
 │  └────────┬─────────┘                                   │
-│    ┌──────┴──────┬──────────┬──────────┐               │
-│ ┌──▼────────┐ ┌─▼────────┐ ┌─▼────────┐               │
-│ │NodeMgr1   │ │NodeMgr2  │ │NodeMgr3  │               │
-│ │Containers │ │Containers│ │Containers│               │
-│ └───────────┘ └──────────┘ └──────────┘               │
+│    ┌──────┴──────┬────────────┬──────────┐              │
+│ ┌──▼────────┐ ┌──▼───────┐ ┌──▼───────┐                 │
+│ │NodeMgr1   │ │NodeMgr2  │ │NodeMgr3  │                 │
+│ │Containers │ │Containers│ │Containers│                 │
+│ └───────────┘ └──────────┘ └──────────┘                 │
 └─────────────────────────────────────────────────────────┘
 ```
 
