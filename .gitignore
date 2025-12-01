@@ -1,0 +1,17 @@
+# Hadoop persistent data
+data/
+
+# Docker volumes
+.volumes/
+
+# Environment files with sensitive data
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,484 @@
+# Hadoop 3-Node Cluster - Docker Implementation
+
+[![Apache Hadoop](https://img.shields.io/badge/Hadoop-3.3.6-orange.svg)](https://hadoop.apache.org/)
+[![Docker](https://img.shields.io/badge/Docker-Compose-blue.svg)](https://docs.docker.com/compose/)
+[![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](https://www.apache.org/licenses/LICENSE-2.0)
+
+> Production-ready Apache Hadoop 3-node distributed cluster dengan Docker Compose, persistent storage, dan fault tolerance.
+
+## 🎯 Overview
+
+Project ini menyediakan setup lengkap untuk menjalankan **Apache Hadoop 3.3.6** distributed cluster dengan:
+
+- **1 NameNode** + **3 DataNodes** (HDFS layer)
+- **1 ResourceManager** + **3 NodeManagers** (YARN layer)
+- **Replication Factor 3** untuk data redundancy
+- **Persistent Storage** dengan Docker volumes
+- **Web UI** untuk monitoring dan management
+
+---
+
+## 🏗️ Arsitektur
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    HDFS Layer                           │
+│  ┌──────────────┐                                       │
+│  │  NameNode    │  Metadata Management                  │
+│  │  Port: 9870  │  (Web UI)                            │
+│  └──────┬───────┘                                       │
+│         │                                                │
+│    ┌────┴────┬──────────┬──────────┐                   │
+│ ┌──▼────┐ ┌─▼──────┐ ┌─▼──────┐                        │
+│ │DataN1 │ │DataN2  │ │DataN3  │  Total: ~720GB         │
+│ └───────┘ └────────┘ └────────┘                        │
+│  Replication Factor: 3 (fault tolerant)                 │
+└─────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────┐
+│                    YARN Layer                           │
+│  ┌──────────────────┐                                   │
+│  │ ResourceManager  │  Resource Scheduling              │
+│  │  Port: 8088      │  (Web UI)                        │
+│  └────────┬─────────┘                                   │
+│    ┌──────┴──────┬──────────┬──────────┐               │
+│ ┌──▼────────┐ ┌─▼────────┐ ┌─▼────────┐               │
+│ │NodeMgr1   │ │NodeMgr2  │ │NodeMgr3  │               │
+│ │Containers │ │Containers│ │Containers│               │
+│ └───────────┘ └──────────┘ └──────────┘               │
+└─────────────────────────────────────────────────────────┘
+```
+
+---
+
+## ✨ Features
+
+✅ **Easy Setup** - Single command untuk deploy entire cluster  
+✅ **Persistent Storage** - Data tetap ada setelah container restart  
+✅ **Fault Tolerant** - 3-node replication untuk data safety  
+✅ **Web Monitoring** - Built-in web UI untuk HDFS dan YARN  
+✅ **Production Ready** - Konfigurasi optimal untuk workload nyata  
+✅ **Well Documented** - Comprehensive docs dengan troubleshooting guide  
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Docker & Docker Compose
+- Minimal 8GB RAM
+- 50GB free disk space
+
+### Installation
+
+**1. Clone repository**
+```bash
+git clone <repository-url>
+cd docker
+```
+
+**2. Format NameNode** (first time only)
+```bash
+docker-compose run --rm namenode hdfs namenode -format -force
+```
+
+**3. Start cluster**
+```bash
+docker-compose up -d
+```
+
+**4. Verify cluster**
+```bash
+# Check all containers running
+docker-compose ps
+
+# Check HDFS health
+docker-compose exec namenode hdfs dfsadmin -report
+
+# Check YARN nodes
+docker-compose exec resourcemanager yarn node -list
+```
+
+**5. Access Web UIs**
+- **NameNode UI**: http://localhost:9870
+- **ResourceManager UI**: http://localhost:8088
+
+---
+
+## 📁 Project Structure
+
+```
+.
+├── docker-compose.yml      # 8 services orchestration
+├── config                  # Hadoop configuration (27 params)
+├── .env                    # Environment variables
+├── test.sh                 # Health check script
+├── data/                   # Persistent storage (auto-created)
+│   ├── namenode/           # HDFS metadata
+│   ├── datanode{1,2,3}/    # HDFS data blocks
+│   └── yarn/               # YARN state
+└── docs/                   # Documentation
+    ├── README.md           # Detailed documentation
+    └── QUICK_REFERENCE.md  # Command cheat sheet
+```
+
+---
+
+## 💻 Common Operations
+
+### HDFS Operations
+
+```bash
+# Create directory
+docker-compose exec namenode hdfs dfs -mkdir -p /user/hadoop
+
+# Upload file
+docker-compose exec namenode hdfs dfs -put /local/file /user/hadoop/
+
+# List files
+docker-compose exec namenode hdfs dfs -ls /user/hadoop/
+
+# Download file
+docker-compose exec namenode hdfs dfs -get /user/hadoop/file /local/path
+
+# Delete file
+docker-compose exec namenode hdfs dfs -rm /user/hadoop/file
+```
+
+### YARN Operations
+
+```bash
+# List running applications
+docker-compose exec resourcemanager yarn application -list
+
+# Run MapReduce example (Pi estimation)
+docker-compose exec resourcemanager hadoop jar \
+  $HADOOP_HOME/share/hadoop/mapreduce/hadoop-mapreduce-examples-*.jar \
+  pi 2 100
+```
+
+### Cluster Management
+
+```bash
+# Start cluster
+docker-compose up -d
+
+# Stop cluster (data persists)
+docker-compose down
+
+# Restart cluster
+docker-compose restart
+
+# View logs
+docker-compose logs -f namenode
+```
+
+---
+
+## 🛠️ Troubleshooting
+
+### NameNode Won't Start
+
+**Symptom**: Container exits with code 1
+
+**Solution**:
+```bash
+# Format namenode
+docker-compose run --rm namenode hdfs namenode -format -force
+
+# Restart
+docker-compose up -d namenode
+```
+
+### DataNodes Not Connecting
+
+**Symptom**: `hdfs dfsadmin -report` shows 0 live datanodes
+
+**Solution**:
+```bash
+# Wait 60 seconds for startup
+sleep 60
+
+# Check again
+docker-compose exec namenode hdfs dfsadmin -report
+
+# If still failing, restart datanodes
+docker-compose restart datanode1 datanode2 datanode3
+```
+
+### Port Already in Use
+
+**Solution**: Change ports in `docker-compose.yml`
+```yaml
+namenode:
+  ports:
+    - "19870:9870"  # Changed from 9870 to 19870
+```
+
+**More troubleshooting**: See [docs/README.md](docs/README.md#troubleshooting)
+
+---
+
+## 📚 Documentation
+
+| Document | Description |
+|----------|-------------|
+| [**Detailed Documentation**](docs/README.md) | Complete guide dengan architecture, konfigurasi, troubleshooting |
+| [**Quick Reference**](docs/QUICK_REFERENCE.md) | Command cheat sheet untuk daily operations |
+
+### Key Topics Covered
+
+- ✅ Penjelasan setiap file dan directory
+- ✅ 9 troubleshooting scenarios dengan solutions
+- ✅ HDFS & YARN operation guides
+- ✅ Backup & restore procedures
+- ✅ Best practices untuk production
+- ✅ Performance tuning tips
+- ✅ Security considerations
+
+---
+
+## 🔧 Configuration
+
+### Key Files
+
+**docker-compose.yml** - Service definitions
+- 1 NameNode (port 9870)
+- 3 DataNodes
+- 1 ResourceManager (port 8088)
+- 3 NodeManagers
+
+**config** - Hadoop parameters
+```
+HDFS-SITE.XML_dfs.replication=3
+HDFS-SITE.XML_dfs.namenode.name.dir=file:///tmp/hadoop-root/dfs/name
+YARN-SITE.XML_yarn.resourcemanager.hostname=resourcemanager
+```
+
+**.env** - Environment variables
+```bash
+HADOOP_HOME=/opt/hadoop
+COMPOSE_PROJECT_NAME=hadoop
+```
+
+---
+
+## 📊 Monitoring
+
+### Web UIs
+
+**NameNode** - http://localhost:9870
+- HDFS overview
+- DataNode status
+- File browser
+- Logs
+
+**ResourceManager** - http://localhost:8088
+- Cluster metrics
+- Running applications
+- Node status
+- Scheduler info
+
+### CLI Monitoring
+
+```bash
+# HDFS status
+docker-compose exec namenode hdfs dfsadmin -report
+
+# YARN nodes
+docker-compose exec resourcemanager yarn node -list
+
+# Disk usage
+docker-compose exec namenode hdfs dfs -du -h /
+
+# Running apps
+docker-compose exec resourcemanager yarn application -list
+```
+
+---
+
+## 💾 Backup & Recovery
+
+### Backup NameNode Metadata (Critical!)
+
+```bash
+# Daily backup
+tar -czf namenode-backup-$(date +%Y%m%d).tar.gz data/namenode/
+```
+
+### Full Cluster Backup
+
+```bash
+# Weekly backup
+tar -czf hadoop-full-backup-$(date +%Y%m%d).tar.gz data/
+```
+
+### Restore
+
+```bash
+# Extract backup
+tar -xzf hadoop-backup-20251201.tar.gz
+
+# Restart cluster
+docker-compose restart
+```
+
+---
+
+## ⚡ Performance Tips
+
+### Resource Limits
+
+Add to `docker-compose.yml`:
+```yaml
+namenode:
+  deploy:
+    resources:
+      limits:
+        cpus: '2'
+        memory: 4G
+```
+
+### HDFS Block Size
+
+Optimize for large files:
+```
+HDFS-SITE.XML_dfs.blocksize=134217728  # 128MB
+```
+
+### YARN Memory
+
+Configure NodeManager memory:
+```
+YARN-SITE.XML_yarn.nodemanager.resource.memory-mb=8192
+YARN-SITE.XML_yarn.scheduler.maximum-allocation-mb=4096
+```
+
+---
+
+## 🔐 Security Considerations
+
+**For Production**:
+
+1. ✅ Enable Kerberos authentication
+2. ✅ Enable HDFS encryption at rest
+3. ✅ Setup SSL/TLS for Web UIs
+4. ✅ Configure firewall rules
+5. ✅ Regular security updates
+6. ✅ Implement access control lists (ACLs)
+7. ✅ Monitor audit logs
+
+---
+
+## 🧪 Testing
+
+### Run Health Check Script
+
+```bash
+docker-compose exec resourcemanager bash /opt/test.sh
+```
+
+Tests performed:
+- ✅ HDFS cluster report
+- ✅ YARN node status
+- ✅ Create HDFS directory
+- ✅ Upload file with replication
+- ✅ Verify replication factor
+- ✅ Run MapReduce Pi estimation
+
+---
+
+## 🤝 Contributing
+
+Contributions welcome! Please:
+
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open Pull Request
+
+---
+
+## 📝 License
+
+This project configuration is based on Apache Hadoop.
+
+- **Apache Hadoop**: [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)
+- **This Configuration**: Free to use and modify
+
+---
+
+## 🔗 Resources
+
+### Official Documentation
+- [Hadoop Documentation](https://hadoop.apache.org/docs/r3.3.6/)
+- [HDFS Architecture](https://hadoop.apache.org/docs/r3.3.6/hadoop-project-dist/hadoop-hdfs/HdfsDesign.html)
+- [YARN Architecture](https://hadoop.apache.org/docs/r3.3.6/hadoop-yarn/hadoop-yarn-site/YARN.html)
+- [MapReduce Tutorial](https://hadoop.apache.org/docs/r3.3.6/hadoop-mapreduce-client/hadoop-mapreduce-client-core/MapReduceTutorial.html)
+
+### Docker
+- [Apache Hadoop Docker Image](https://hub.docker.com/r/apache/hadoop)
+- [Docker Compose Documentation](https://docs.docker.com/compose/)
+
+### Community
+- [Apache Hadoop Wiki](https://cwiki.apache.org/confluence/display/HADOOP)
+- [Stack Overflow - hadoop tag](https://stackoverflow.com/questions/tagged/hadoop)
+
+---
+
+## 📧 Support
+
+Untuk pertanyaan, issues, atau contributions:
+
+- 🐛 [Report Issues](../../issues)
+- 💡 [Feature Requests](../../issues)
+- 📖 [Documentation](docs/README.md)
+- ⚡ [Quick Reference](docs/QUICK_REFERENCE.md)
+
+---
+
+## 🎓 Learning Resources
+
+**Recommended for Beginners**:
+1. Start dengan [Quick Start](#-quick-start)
+2. Explore Web UIs (NameNode & ResourceManager)
+3. Practice HDFS operations dari [Common Operations](#-common-operations)
+4. Run MapReduce examples
+5. Read [Detailed Documentation](docs/README.md)
+
+**For Advanced Users**:
+- Performance tuning guidelines
+- Security hardening procedures
+- Custom configuration optimization
+- Integration dengan ecosystem tools (Hive, Spark, HBase)
+
+---
+
+## 🌟 Star History
+
+If you find this project useful, please consider giving it a ⭐!
+
+---
+
+## 📅 Changelog
+
+**v1.0.0** (2025-12-01)
+- ✅ Initial 3-node cluster setup
+- ✅ Persistent storage implementation
+- ✅ Replication factor 3 configuration
+- ✅ Docker Compose orchestration
+- ✅ Comprehensive documentation
+- ✅ Health check scripts
+- ✅ Troubleshooting guides
+
+---
+
+<div align="center">
+
+**Built with ❤️ for the Hadoop Community**
+
+[Documentation](docs/README.md) • [Quick Reference](docs/QUICK_REFERENCE.md) • [Report Bug](../../issues) • [Request Feature](../../issues)
+
+</div>
