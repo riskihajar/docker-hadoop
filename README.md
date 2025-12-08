@@ -56,8 +56,8 @@ Project ini menyediakan setup lengkap untuk menjalankan **Apache Hadoop 3.3.6** 
 ✅ **Easy Setup** - Single command untuk deploy entire cluster
 ✅ **Persistent Storage** - Data tetap ada setelah container restart
 ✅ **Fault Tolerant** - 3-node replication untuk data safety
-✅ **Web Monitoring** - Built-in web UI untuk HDFS, YARN, dan individual DataNode
-✅ **Individual DataNode Access** - Monitor setiap DataNode secara terpisah via Web UI
+✅ **Web Monitoring** - Built-in web UI untuk NameNode, ResourceManager, DataNode, dan NodeManager
+✅ **Individual Node Access** - Monitor setiap DataNode dan NodeManager secara terpisah via Web UI
 ✅ **Production Ready** - Konfigurasi optimal untuk workload nyata
 ✅ **Well Documented** - Comprehensive docs dengan troubleshooting guide  
 
@@ -113,6 +113,9 @@ Add these lines:
 127.0.0.1 datanode1
 127.0.0.1 datanode2
 127.0.0.1 datanode3
+127.0.0.1 nodemanager1
+127.0.0.1 nodemanager2
+127.0.0.1 nodemanager3
 ```
 
 **6. Access Web UIs**
@@ -121,6 +124,9 @@ Add these lines:
 - **DataNode 1 UI**: http://localhost:9864
 - **DataNode 2 UI**: http://localhost:9865
 - **DataNode 3 UI**: http://localhost:9866
+- **NodeManager 1 UI**: http://localhost:8042
+- **NodeManager 2 UI**: http://localhost:8043
+- **NodeManager 3 UI**: http://localhost:8044
 
 ### 📸 Cluster Screenshots
 
@@ -278,7 +284,10 @@ namenode:
   - `datanode2` (container_name: datanode2, hostname: datanode2, port: 9865)
   - `datanode3` (container_name: datanode3, hostname: datanode3, port: 9866)
 - 1 ResourceManager (port 8088)
-- 3 NodeManagers
+- 3 NodeManagers with hostname and port mapping:
+  - `nodemanager1` (container_name: nodemanager1, hostname: nodemanager1, port: 8042)
+  - `nodemanager2` (container_name: nodemanager2, hostname: nodemanager2, port: 8043)
+  - `nodemanager3` (container_name: nodemanager3, hostname: nodemanager3, port: 8044)
 
 **config** - Hadoop parameters
 ```
@@ -289,11 +298,14 @@ HDFS-SITE.XML_dfs.datanode.use.datanode.hostname=false
 YARN-SITE.XML_yarn.resourcemanager.hostname=resourcemanager
 ```
 
-**/etc/hosts** - Hostname resolution (Required for DataNode Web UI)
+**/etc/hosts** - Hostname resolution (Required for DataNode & NodeManager Web UI)
 ```
 127.0.0.1 datanode1
 127.0.0.1 datanode2
 127.0.0.1 datanode3
+127.0.0.1 nodemanager1
+127.0.0.1 nodemanager2
+127.0.0.1 nodemanager3
 ```
 
 **.env** - Environment variables
@@ -336,6 +348,22 @@ COMPOSE_PROJECT_NAME=hadoop
 - Node status
 - Scheduler info
 
+**NodeManager Web UIs** (YARN resource monitoring)
+- **NodeManager 1** - http://localhost:8042
+  - Container information
+  - Resource allocation
+  - Application logs
+- **NodeManager 2** - http://localhost:8043
+  - Container information
+  - Resource allocation
+  - Application logs
+- **NodeManager 3** - http://localhost:8044
+  - Container information
+  - Resource allocation
+  - Application logs
+
+> **Note**: NodeManager Web UIs require hostname configuration in `/etc/hosts` as described in Quick Start section.
+
 ### CLI Monitoring
 
 ```bash
@@ -358,6 +386,11 @@ docker-compose exec resourcemanager yarn application -list
 docker logs datanode1
 docker logs datanode2
 docker logs datanode3
+
+# Individual NodeManager logs
+docker logs nodemanager1
+docker logs nodemanager2
+docker logs nodemanager3
 ```
 
 ---
@@ -532,8 +565,11 @@ If you find this project useful, please consider giving it a ⭐!
 - ✅ Added DataNode hostname configuration (datanode1, datanode2, datanode3)
 - ✅ Enabled individual DataNode Web UI access
 - ✅ Configured port mapping for DataNode monitoring (9864, 9865, 9866)
-- ✅ Added `/etc/hosts` configuration guide
-- ✅ Enhanced monitoring capabilities with per-node metrics
+- ✅ Added NodeManager hostname configuration (nodemanager1, nodemanager2, nodemanager3)
+- ✅ Enabled individual NodeManager Web UI access
+- ✅ Configured port mapping for NodeManager monitoring (8042, 8043, 8044)
+- ✅ Added `/etc/hosts` configuration guide for both HDFS and YARN layers
+- ✅ Enhanced monitoring capabilities with per-node metrics for DataNode and NodeManager
 
 **v1.0.0** (2025-12-01)
 - ✅ Initial 3-node cluster setup

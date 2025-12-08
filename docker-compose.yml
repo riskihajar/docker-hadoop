@@ -61,21 +61,33 @@ services:
         - ./data/yarn/resourcemanager:/tmp/hadoop-yarn/resourcemanager
    nodemanager1:
       image: apache/hadoop:3
+      container_name: nodemanager1
+      hostname: nodemanager1
       command: ["yarn", "nodemanager"]
+      ports:
+        - 8042:8042
       env_file:
         - ./config
       volumes:
         - ./data/yarn/nodemanager1:/tmp/hadoop-yarn/nodemanager
    nodemanager2:
       image: apache/hadoop:3
+      container_name: nodemanager2
+      hostname: nodemanager2
       command: ["yarn", "nodemanager"]
+      ports:
+        - 8043:8042
       env_file:
         - ./config
       volumes:
         - ./data/yarn/nodemanager2:/tmp/hadoop-yarn/nodemanager
    nodemanager3:
       image: apache/hadoop:3
+      container_name: nodemanager3
+      hostname: nodemanager3
       command: ["yarn", "nodemanager"]
+      ports:
+        - 8044:8042
       env_file:
         - ./config
       volumes:
