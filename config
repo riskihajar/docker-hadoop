@@ -4,6 +4,8 @@ HDFS-SITE.XML_dfs.namenode.rpc-address=namenode:8020
 HDFS-SITE.XML_dfs.replication=3
 HDFS-SITE.XML_dfs.namenode.name.dir=file:///tmp/hadoop-root/dfs/name
 HDFS-SITE.XML_dfs.datanode.data.dir=file:///tmp/hadoop-root/dfs/data
+HDFS-SITE.XML_dfs.client.use.datanode.hostname=false
+HDFS-SITE.XML_dfs.datanode.use.datanode.hostname=false
 MAPRED-SITE.XML_mapreduce.framework.name=yarn
 MAPRED-SITE.XML_yarn.app.mapreduce.am.env=HADOOP_MAPRED_HOME=$HADOOP_HOME
 MAPRED-SITE.XML_mapreduce.map.env=HADOOP_MAPRED_HOME=$HADOOP_HOME

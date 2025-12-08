@@ -53,11 +53,12 @@ Project ini menyediakan setup lengkap untuk menjalankan **Apache Hadoop 3.3.6** 
 
 ## ✨ Features
 
-✅ **Easy Setup** - Single command untuk deploy entire cluster  
-✅ **Persistent Storage** - Data tetap ada setelah container restart  
-✅ **Fault Tolerant** - 3-node replication untuk data safety  
-✅ **Web Monitoring** - Built-in web UI untuk HDFS dan YARN  
-✅ **Production Ready** - Konfigurasi optimal untuk workload nyata  
+✅ **Easy Setup** - Single command untuk deploy entire cluster
+✅ **Persistent Storage** - Data tetap ada setelah container restart
+✅ **Fault Tolerant** - 3-node replication untuk data safety
+✅ **Web Monitoring** - Built-in web UI untuk HDFS, YARN, dan individual DataNode
+✅ **Individual DataNode Access** - Monitor setiap DataNode secara terpisah via Web UI
+✅ **Production Ready** - Konfigurasi optimal untuk workload nyata
 ✅ **Well Documented** - Comprehensive docs dengan troubleshooting guide  
 
 ---
@@ -100,9 +101,26 @@ docker-compose exec namenode hdfs dfsadmin -report
 docker-compose exec resourcemanager yarn node -list
 ```
 
-**5. Access Web UIs**
+**5. Configure hostname resolution** (for DataNode Web UI access)
+
+Add to `/etc/hosts`:
+```bash
+sudo nano /etc/hosts
+```
+
+Add these lines:
+```
+127.0.0.1 datanode1
+127.0.0.1 datanode2
+127.0.0.1 datanode3
+```
+
+**6. Access Web UIs**
 - **NameNode UI**: http://localhost:9870
 - **ResourceManager UI**: http://localhost:8088
+- **DataNode 1 UI**: http://localhost:9864
+- **DataNode 2 UI**: http://localhost:9865
+- **DataNode 3 UI**: http://localhost:9866
 
 ### 📸 Cluster Screenshots
 
@@ -255,7 +273,10 @@ namenode:
 
 **docker-compose.yml** - Service definitions
 - 1 NameNode (port 9870)
-- 3 DataNodes
+- 3 DataNodes with hostname and port mapping:
+  - `datanode1` (container_name: datanode1, hostname: datanode1, port: 9864)
+  - `datanode2` (container_name: datanode2, hostname: datanode2, port: 9865)
+  - `datanode3` (container_name: datanode3, hostname: datanode3, port: 9866)
 - 1 ResourceManager (port 8088)
 - 3 NodeManagers
 
@@ -263,7 +284,16 @@ namenode:
 ```
 HDFS-SITE.XML_dfs.replication=3
 HDFS-SITE.XML_dfs.namenode.name.dir=file:///tmp/hadoop-root/dfs/name
+HDFS-SITE.XML_dfs.client.use.datanode.hostname=false
+HDFS-SITE.XML_dfs.datanode.use.datanode.hostname=false
 YARN-SITE.XML_yarn.resourcemanager.hostname=resourcemanager
+```
+
+**/etc/hosts** - Hostname resolution (Required for DataNode Web UI)
+```
+127.0.0.1 datanode1
+127.0.0.1 datanode2
+127.0.0.1 datanode3
 ```
 
 **.env** - Environment variables
@@ -284,6 +314,22 @@ COMPOSE_PROJECT_NAME=hadoop
 - File browser
 - Logs
 
+**DataNode Web UIs** (Individual monitoring)
+- **DataNode 1** - http://localhost:9864
+  - Block information
+  - Volume status
+  - Storage metrics
+- **DataNode 2** - http://localhost:9865
+  - Block information
+  - Volume status
+  - Storage metrics
+- **DataNode 3** - http://localhost:9866
+  - Block information
+  - Volume status
+  - Storage metrics
+
+> **Note**: DataNode Web UIs require hostname configuration in `/etc/hosts` as described in Quick Start section.
+
 **ResourceManager** - http://localhost:8088
 - Cluster metrics
 - Running applications
@@ -299,11 +345,19 @@ docker-compose exec namenode hdfs dfsadmin -report
 # YARN nodes
 docker-compose exec resourcemanager yarn node -list
 
+# Check specific file distribution across DataNodes
+docker-compose exec namenode hdfs fsck /path/to/file -files -blocks -locations
+
 # Disk usage
 docker-compose exec namenode hdfs dfs -du -h /
 
 # Running apps
 docker-compose exec resourcemanager yarn application -list
+
+# Individual DataNode logs
+docker logs datanode1
+docker logs datanode2
+docker logs datanode3
 ```
 
 ---
@@ -473,6 +527,13 @@ If you find this project useful, please consider giving it a ⭐!
 ---
 
 ## 📅 Changelog
+
+**v1.1.0** (2025-12-08)
+- ✅ Added DataNode hostname configuration (datanode1, datanode2, datanode3)
+- ✅ Enabled individual DataNode Web UI access
+- ✅ Configured port mapping for DataNode monitoring (9864, 9865, 9866)
+- ✅ Added `/etc/hosts` configuration guide
+- ✅ Enhanced monitoring capabilities with per-node metrics
 
 **v1.0.0** (2025-12-01)
 - ✅ Initial 3-node cluster setup

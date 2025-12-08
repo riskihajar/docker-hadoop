@@ -17,21 +17,33 @@ services:
         - ./data/namenode:/tmp/hadoop-root/dfs/name
    datanode1:
       image: apache/hadoop:3
+      container_name: datanode1
+      hostname: datanode1
       command: ["hdfs", "datanode"]
+      ports:
+        - 9864:9864
       env_file:
         - ./config
       volumes:
         - ./data/datanode1:/tmp/hadoop-root/dfs/data
    datanode2:
       image: apache/hadoop:3
+      container_name: datanode2
+      hostname: datanode2
       command: ["hdfs", "datanode"]
+      ports:
+        - 9865:9864
       env_file:
         - ./config
       volumes:
         - ./data/datanode2:/tmp/hadoop-root/dfs/data
    datanode3:
       image: apache/hadoop:3
+      container_name: datanode3
+      hostname: datanode3
       command: ["hdfs", "datanode"]
+      ports:
+        - 9866:9864
       env_file:
         - ./config
       volumes:
@@ -68,4 +80,3 @@ services:
         - ./config
       volumes:
         - ./data/yarn/nodemanager3:/tmp/hadoop-yarn/nodemanager
-
