@@ -4,6 +4,9 @@ data/
 # Docker volumes
 .volumes/
 
+# Playwright MCP
+.playwright-mcp
+
 # Environment files with sensitive data
 .env.local
 .env.*.local
