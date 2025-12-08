@@ -147,14 +147,20 @@ Add these lines:
 ├── docker-compose.yml      # 8 services orchestration
 ├── config                  # Hadoop configuration (27 params)
 ├── .env                    # Environment variables
+├── .gitignore              # Git ignore patterns
 ├── test.sh                 # Health check script
+├── .claude/                # Claude AI configuration
+├── .playwright-mcp/        # Playwright test screenshots
 ├── data/                   # Persistent storage (auto-created)
 │   ├── namenode/           # HDFS metadata
 │   ├── datanode{1,2,3}/    # HDFS data blocks
 │   └── yarn/               # YARN state
-└── docs/                   # Documentation
-    ├── README.md           # Detailed documentation
-    └── QUICK_REFERENCE.md  # Command cheat sheet
+├── docs/                   # Documentation
+│   ├── README.md           # Detailed documentation
+│   └── QUICK_REFERENCE.md  # Command cheat sheet
+└── images/                 # Screenshots for documentation
+    ├── namenode.png        # NameNode Web UI
+    └── nodes-of-cluster.png # Cluster nodes overview
 ```
 
 ---
