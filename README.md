@@ -104,6 +104,16 @@ docker-compose exec resourcemanager yarn node -list
 - **NameNode UI**: http://localhost:9870
 - **ResourceManager UI**: http://localhost:8088
 
+### 📸 Cluster Screenshots
+
+**NameNode Web Interface**
+
+![NameNode UI](./images/namenode.png)
+
+**Cluster Nodes Overview**
+
+![Nodes of Cluster](./images/nodes-of-cluster.png)
+
 ---
 
 ## 📁 Project Structure
